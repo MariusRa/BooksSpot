@@ -91,7 +91,7 @@ namespace Books_spot.Controllers
         {
             if (!dto.IsBorrowed)
             {
-                var freeBooks = _bookService.GetAllBooks(1, 10).Where(x => x.BookBorrowed == null).ToList();
+                var freeBooks = _bookService.GetAllBooks(1, 10).Where(x => x.BookBorrowed == "").ToList();
 
                 return freeBooks;
             }
