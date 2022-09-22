@@ -14,7 +14,6 @@ namespace Books_spot.DAL
         }
         public DbSet<Book> Books { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<BookStatus> BookStatuses { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

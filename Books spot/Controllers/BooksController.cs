@@ -91,7 +91,7 @@ namespace Books_spot.Controllers
         {
             if (!dto.IsBorrowed)
             {
-                var freeBooks = _bookService.GetAllBooks(1, 10).Where(x => x.UserId == Guid.Empty).ToList();
+                var freeBooks = _bookService.GetAllBooks(1, 10).Where(x => x.BookBorrowed == null).ToList();
 
                 return freeBooks;
             }
@@ -105,9 +105,10 @@ namespace Books_spot.Controllers
         public IActionResult BorrowBook(BorrowDTO dto)
         {
             var user = _userService.GetUserById(dto.UserId);
+            if (user == null) return BadRequest(new { message = "User not exists" });
             var book = _bookService.GetBookById(dto.BookId);
 
-            if (book.UserId == Guid.Empty)
+            if (book.BookBorrowed == "")
             {
                 _bookService.BorrowedBook(dto.UserId, dto.BookId);
 
@@ -116,7 +117,7 @@ namespace Books_spot.Controllers
                     message = "Book was borrowed successfully"
                 });
             }
-            else if (book.UserId == user.UserId || user.Role == "Admin")
+            else if (book.BookBorrowed == user.UserId.ToString() || user.Role == "Admin")
             {
                 _bookService.UnBorrowedBook(dto.BookId);
 
@@ -135,29 +136,32 @@ namespace Books_spot.Controllers
         [HttpPost("reserve")]
         public IActionResult ReservedBook(ReserveDTO dto)
         {
-            var reservation = _bookService.GetBookReservations(dto.BookId).FirstOrDefault(x => x.UserId == dto.UserId);
+            var user = _userService.GetUserById(dto.UserId);
+            if (user == null) return BadRequest(new { message = "User not exists" });
+            var book = _bookService.GetBookById(dto.BookId);
 
-            if (reservation == null)
+            if (book.BookReserved == "")
             {
-                var newReservation = new BookStatus
-                {
-                    BookId = dto.BookId,
-                    UserId = dto.UserId,
-                    IsReserved = true
-                };
+                _bookService.Reserve(dto.UserId, dto.BookId);
 
-                _bookService.Reserve(newReservation);
                 return Ok(new
                 {
                     message = "Book was reserved successfully"
                 });
             }
+            else if (book.BookReserved == user.UserId.ToString() || user.Role == "Admin")
+            {
+                _bookService.CancelReservation(dto.BookId);
 
-            _bookService.CancelReservation(reservation);
+                return Ok(new
+                {
+                    message = "Reservation was canceled successfully"
+                });
+            }
 
             return Ok(new
             {
-                message = "Reservation was canceled"
+                message = "Book is reserved by other reader"
             });
         }
     }

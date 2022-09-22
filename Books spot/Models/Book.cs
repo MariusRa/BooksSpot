@@ -11,9 +11,7 @@ namespace Books_spot.Models
         public string PublishingDate { get; set; }
         public string Genre { get; set; }
         public string ISBN10 { get; set; }
-        public Guid UserId { get; set; }
-
-
-        public ICollection<BookStatus> BookStatuses { get; set; }
+        public string BookBorrowed { get; set; }
+        public string BookReserved { get; set; }
     }
 }

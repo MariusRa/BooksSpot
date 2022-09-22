@@ -11,6 +11,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors();
+
 builder.Services.AddDbContext<BooksSpotDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("BooksSpotDatabase")));
 
@@ -43,6 +45,13 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(options => options
+                .WithOrigins(new[] { "http://localhost:3000", "http://localhost:8000", "http://localhost:4200" })
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()
+            );
 
 app.UseAuthorization();
 

@@ -16,23 +16,19 @@ namespace Books_spot.Services
 
         public ICollection<Book> GetAllBooks(int page, int size)
         {
-            return _db.Books.Include(u => u.BookStatuses).Skip((page - 1) * size).Take(size).ToList();
+            return _db.Books.Skip((page - 1) * size).Take(size).ToList();
         }
 
         public Book GetBookById(Guid bookId)
         {
-            return _db.Books.Include(x => x.BookStatuses).FirstOrDefault(x => x.BookId == bookId);
+            return _db.Books.FirstOrDefault(x => x.BookId == bookId);
         }
-
-        public ICollection<BookStatus> GetBookReservations(Guid id)
-        {
-            return _db.BookStatuses.Where(x => x.BookId == id).ToList();
-        }
+               
         public Book BorrowedBook(Guid userId, Guid bookId)
         {
             var book = _db.Books.FirstOrDefault(x => x.BookId == bookId);
 
-            book.UserId = userId;
+            book.BookBorrowed = userId.ToString();
 
             _db.SaveChanges();
 
@@ -43,28 +39,33 @@ namespace Books_spot.Services
         {
             var book = _db.Books.FirstOrDefault(x => x.BookId == bookId);
 
-            book.UserId = Guid.Empty;
+            book.BookBorrowed = "";
 
             _db.SaveChanges();
 
             return book;
         }
 
-        public BookStatus Reserve(BookStatus bookStatus)
+        public Book Reserve(Guid userId, Guid bookId)
         {
-            _db.BookStatuses.Add(bookStatus);
+            var book = _db.Books.FirstOrDefault(x => x.BookId == bookId);
+
+            book.BookReserved = userId.ToString();
+
             _db.SaveChanges();
 
-            return bookStatus;
+            return book;
         }
 
-
-        public BookStatus CancelReservation(BookStatus bookStatus)
+        public Book CancelReservation(Guid bookId)
         {
-            _db.BookStatuses.Remove(bookStatus);
+            var book = _db.Books.FirstOrDefault(x => x.BookId == bookId);
+
+            book.BookReserved = "";
+
             _db.SaveChanges();
 
-            return bookStatus;
+            return book;
         }
     }
 }
